@@ -73,6 +73,36 @@
             color: #c0392b;
             font-weight: bold;
         }
+        /* 管理员登录弹窗样式 */
+        #adminLoginModal {
+            display: none;
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0,0,0,0.3);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        #adminLoginModal > div {
+            background: white;
+            padding: 30px 40px;
+            border-radius: 12px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.2);
+            min-width: 320px;
+        }
+        #adminStatusMsg {
+            min-height: 24px;
+        }
+        /* 管理员后台样式 */
+        #adminPage {
+            display: none;
+        }
+        #adminFileList, #adminMsgContent {
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
@@ -90,6 +120,7 @@
                        id="secretCode"
                        placeholder="请输入6位密码">
                 <button class="btn" onclick="verifyAccess()">进入系统</button>
+                <button class="btn" style="background:#1976d2; margin-top:10px;" onclick="openAdminLogin()">管理员登录</button>
                 <div id="statusMsg"></div>
             </div>
         </div>
@@ -101,6 +132,28 @@
                 <button class="btn" onclick="returnToLogin()">安全退出</button>
             </div>
             <div id="messageList"></div>
+        </div>
+
+        <!-- 管理员登录弹窗 -->
+        <div id="adminLoginModal">
+            <div>
+                <h2 style="margin-top:0;">管理员登录</h2>
+                <input type="text" id="adminUser" placeholder="管理员账号" style="width:90%; margin-bottom:12px;">
+                <input type="password" id="adminPwd" placeholder="管理员密码" style="width:90%; margin-bottom:18px;">
+                <div id="adminStatusMsg" style="min-height:24px;"></div>
+                <button class="btn" onclick="verifyAdmin()">登录</button>
+                <button class="btn" style="background:#aaa; margin-left:10px;" onclick="closeAdminLogin()">取消</button>
+            </div>
+        </div>
+
+        <!-- 管理员后台界面 -->
+        <div id="adminPage">
+            <div style="display:flex; justify-content:space-between; align-items:center">
+                <h1>🛠️ 管理员后台</h1>
+                <button class="btn" onclick="adminLogout()">安全退出</button>
+            </div>
+            <div id="adminFileList" style="margin-top:20px;"></div>
+            <div id="adminMsgContent" style="margin-top:20px;"></div>
         </div>
     </div>
 
@@ -177,6 +230,10 @@
         let loginAttempts = 0;
         let isSystemLocked = false;
         let unlockTimeout = null;
+
+        // ====== 管理员系统 ======
+        const ADMIN_CONFIG = { user: 'rover', pwd: '18759122968liujunkai' };
+        let isAdmin = false;
 
         // ========= 核心功能 =========
         async function verifyAccess() {
@@ -302,6 +359,105 @@
             document.getElementById('stuNumber').value = '';
             document.getElementById('secretCode').value = '';
             document.getElementById('messageList').innerHTML = '';
+        }
+
+        // ====== 管理员系统 ======
+        function openAdminLogin() {
+            document.getElementById('adminLoginModal').style.display = 'flex';
+            document.getElementById('adminUser').value = '';
+            document.getElementById('adminPwd').value = '';
+            document.getElementById('adminStatusMsg').innerHTML = '';
+        }
+        function closeAdminLogin() {
+            document.getElementById('adminLoginModal').style.display = 'none';
+        }
+        function verifyAdmin() {
+            const user = document.getElementById('adminUser').value.trim();
+            const pwd = document.getElementById('adminPwd').value;
+            const msg = document.getElementById('adminStatusMsg');
+            if (user === ADMIN_CONFIG.user && pwd === ADMIN_CONFIG.pwd) {
+                isAdmin = true;
+                closeAdminLogin();
+                showAdminPage();
+            } else {
+                msg.innerHTML = '<span style="color:#e74c3c">账号或密码错误</span>';
+            }
+        }
+        function showAdminPage() {
+            document.getElementById('loginPage').style.display = 'none';
+            document.getElementById('messagePage').style.display = 'none';
+            document.getElementById('adminPage').style.display = 'block';
+            loadAdminFileList();
+        }
+        function adminLogout() {
+            isAdmin = false;
+            document.getElementById('adminPage').style.display = 'none';
+            document.getElementById('loginPage').style.display = 'block';
+            document.getElementById('adminMsgContent').innerHTML = '';
+        }
+        async function loadAdminFileList() {
+            const listDiv = document.getElementById('adminFileList');
+            listDiv.innerHTML = '正在加载留言文件列表...';
+            try {
+                let html = '<b>留言文件列表：</b><ul style="margin-top:10px;">';
+                for (let i = 1; i <= 59; i++) {
+                    html += `<li><a href="#" onclick="viewMsgFile(${i});return false;">messages/${i}.txt</a> <a href="#" style="color:#1976d2;font-size:13px;margin-left:8px;" onclick="editMsgFile(${i});return false;">[编辑]</a></li>`;
+                }
+                html += '</ul>';
+                listDiv.innerHTML = html;
+            } catch (e) {
+                listDiv.innerHTML = '<span style="color:#e74c3c">加载失败</span>';
+            }
+        }
+        async function viewMsgFile(num) {
+            const contentDiv = document.getElementById('adminMsgContent');
+            contentDiv.innerHTML = '正在加载...';
+            try {
+                const res = await fetch(`messages/${num}.txt`);
+                if (!res.ok) throw new Error('文件不存在');
+                const txt = await res.text();
+                contentDiv.innerHTML = `<b>messages/${num}.txt 内容：</b><pre style="background:#f8faf8; padding:12px; border-radius:6px;">${txt.replace(/[<>&]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]))}</pre>`;
+            } catch (e) {
+                contentDiv.innerHTML = `<span style="color:#e74c3c">${e.message}</span>`;
+            }
+        }
+        // 管理员留言编辑与保存（后端实际保存）
+        async function editMsgFile(num) {
+            const contentDiv = document.getElementById('adminMsgContent');
+            contentDiv.innerHTML = '正在加载...';
+            try {
+                const res = await fetch(`messages/${num}.txt`);
+                let txt = '';
+                if (res.ok) txt = await res.text();
+                contentDiv.innerHTML = `<b>messages/${num}.txt 编辑：</b><br><textarea id='editMsgArea' style='width:98%;height:180px;margin:10px 0;border-radius:6px;padding:8px;font-size:15px;'>${txt.replace(/[<>&]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]))}</textarea><br><button class='btn' style='padding:8px 18px;font-size:14px;' onclick='saveMsgFile(${num})'>保存</button> <span id='editMsgTip'></span>`;
+            } catch (e) {
+                contentDiv.innerHTML = `<span style='color:#e74c3c'>加载失败</span>`;
+            }
+        }
+        async function saveMsgFile(num) {
+            const area = document.getElementById('editMsgArea');
+            const tip = document.getElementById('editMsgTip');
+            const content = area.value;
+            tip.style.color = '#e67e22';
+            tip.innerText = '正在保存...';
+            try {
+                const res = await fetch('/api/save-message', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ num, content })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    tip.style.color = '#27ae60';
+                    tip.innerText = '保存成功';
+                } else {
+                    tip.style.color = '#e74c3c';
+                    tip.innerText = data.msg || '保存失败';
+                }
+            } catch (e) {
+                tip.style.color = '#e74c3c';
+                tip.innerText = '保存失败，网络或服务器错误';
+            }
         }
 
         // ========= 辅助函数 =========
