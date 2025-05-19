@@ -399,9 +399,10 @@
             const listDiv = document.getElementById('adminFileList');
             listDiv.innerHTML = '正在加载留言文件列表...';
             try {
+                // 简单实现：假设留言文件为 messages/1.txt ~ messages/59.txt
                 let html = '<b>留言文件列表：</b><ul style="margin-top:10px;">';
                 for (let i = 1; i <= 59; i++) {
-                    html += `<li><a href="#" onclick="viewMsgFile(${i});return false;">messages/${i}.txt</a> <a href="#" style="color:#1976d2;font-size:13px;margin-left:8px;" onclick="editMsgFile(${i});return false;">[编辑]</a></li>`;
+                    html += `<li><a href="#" onclick="viewMsgFile(${i});return false;">messages/${i}.txt</a></li>`;
                 }
                 html += '</ul>';
                 listDiv.innerHTML = html;
@@ -419,44 +420,6 @@
                 contentDiv.innerHTML = `<b>messages/${num}.txt 内容：</b><pre style="background:#f8faf8; padding:12px; border-radius:6px;">${txt.replace(/[<>&]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]))}</pre>`;
             } catch (e) {
                 contentDiv.innerHTML = `<span style="color:#e74c3c">${e.message}</span>`;
-            }
-        }
-        // 管理员留言编辑与保存（后端实际保存）
-        async function editMsgFile(num) {
-            const contentDiv = document.getElementById('adminMsgContent');
-            contentDiv.innerHTML = '正在加载...';
-            try {
-                const res = await fetch(`messages/${num}.txt`);
-                let txt = '';
-                if (res.ok) txt = await res.text();
-                contentDiv.innerHTML = `<b>messages/${num}.txt 编辑：</b><br><textarea id='editMsgArea' style='width:98%;height:180px;margin:10px 0;border-radius:6px;padding:8px;font-size:15px;'>${txt.replace(/[<>&]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]))}</textarea><br><button class='btn' style='padding:8px 18px;font-size:14px;' onclick='saveMsgFile(${num})'>保存</button> <span id='editMsgTip'></span>`;
-            } catch (e) {
-                contentDiv.innerHTML = `<span style='color:#e74c3c'>加载失败</span>`;
-            }
-        }
-        async function saveMsgFile(num) {
-            const area = document.getElementById('editMsgArea');
-            const tip = document.getElementById('editMsgTip');
-            const content = area.value;
-            tip.style.color = '#e67e22';
-            tip.innerText = '正在保存...';
-            try {
-                const res = await fetch('/api/save-message', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ num, content })
-                });
-                const data = await res.json();
-                if (data.success) {
-                    tip.style.color = '#27ae60';
-                    tip.innerText = '保存成功';
-                } else {
-                    tip.style.color = '#e74c3c';
-                    tip.innerText = data.msg || '保存失败';
-                }
-            } catch (e) {
-                tip.style.color = '#e74c3c';
-                tip.innerText = '保存失败，网络或服务器错误';
             }
         }
 
