@@ -154,6 +154,14 @@
             </div>
             <div id="adminFileList" style="margin-top:20px;"></div>
             <div id="adminMsgContent" style="margin-top:20px;"></div>
+
+            <!-- 查看学生密码 功能区域 -->
+            <div style="margin-top:30px; padding:18px; background:#f5f9ff; border-radius:8px;">
+                <h3>🔍 查看学生密码</h3>
+                <input type="number" id="queryPwdNum" placeholder="学号(1-59)" min="1" max="59" style="width:80px;">
+                <button class="btn" style="padding:8px 18px; font-size:14px;" onclick="showStudentPwd()">查询</button>
+                <span id="showPwdMsg" style="margin-left:10px;color:#1976d2;font-weight:bold;"></span>
+            </div>
         </div>
     </div>
 
@@ -420,6 +428,24 @@
                 contentDiv.innerHTML = `<b>messages/${num}.txt 内容：</b><pre style="background:#f8faf8; padding:12px; border-radius:6px;">${txt.replace(/[<>&]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]))}</pre>`;
             } catch (e) {
                 contentDiv.innerHTML = `<span style="color:#e74c3c">${e.message}</span>`;
+            }
+        }
+        // 查看学生密码
+        function showStudentPwd() {
+            const num = parseInt(document.getElementById('queryPwdNum').value);
+            const msg = document.getElementById('showPwdMsg');
+            if (isNaN(num) || num < 1 || num > 59) {
+                msg.style.color = '#e74c3c';
+                msg.innerText = '学号无效';
+                return;
+            }
+            const pwd = SYSTEM_CONFIG.PASSWORDS[num];
+            if (pwd) {
+                msg.style.color = '#1976d2';
+                msg.innerText = `学号${num}的密码为：${pwd}`;
+            } else {
+                msg.style.color = '#e74c3c';
+                msg.innerText = '该学号未设置密码';
             }
         }
 
