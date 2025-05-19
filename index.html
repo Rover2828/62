@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>毕业留言保密系统</title>
+    <style>
+        /* 基础样式 */
+        body {
+            font-family: '微软雅黑', Arial, sans-serif;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #f0f9ff;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+        }
+
+        /* 输入区域 */
+        .input-group {
+            margin: 20px 0;
+        }
+        input {
+            width: 250px;
+            padding: 12px;
+            margin: 8px 0;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+        input:focus {
+            outline: 2px solid #4CAF50;
+        }
+
+        /* 按钮样式 */
+        .btn {
+            padding: 12px 25px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .btn:hover {
+            background: #45a049;
+            transform: translateY(-1px);
+        }
+
+        /* 留言样式 */
+        .message-card {
+            background: #f8fff8;
+            border-left: 5px solid #4CAF50;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+        .message-author {
+            color: #2c3e50;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        /* 加载动画 */
+        .loader {
+            width: 30px;
+            height: 30px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #4CAF50;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* 错误提示 */
+        .error-msg {
+            color: #e74c3c;
+            margin: 10px 0;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 登录界面 -->
+        <div id="loginPage">
+            <h1>🌸 毕业留言保密系统 🌸</h1>
+            <div class="input-group">
+                <input type="number" 
+                       id="stuNumber" 
+                       placeholder="请输入学号 (1-59)"
+                       min="1"
+                       max="59">
+                <input type="password"
+                       id="secretCode"
+                       placeholder="请输入6位班级密码">
+                <button class="btn" onclick="verifyAccess()">进入系统</button>
+                <div id="statusMsg" class="error-msg"></div>
+            </div>
+        </div>
+
+        <!-- 留言界面 -->
+        <div id="messagePage" style="display:none;">
+            <div style="display: flex; justify-content: space-between; align-items: center">
+                <h1>🎉 你的专属留言</h1>
+                <button class="btn" onclick="returnToLogin()">返回</button>
+            </div>
+            <div id="messageList"></div>
+        </div>
+    </div>
+
+    <script>
+        // ========= 系统配置 =========
+        const SYSTEM_CONFIG = {
+            PASSWORD: "202562",  
+            MAX_ATTEMPTS: 3,    
+            LOCK_TIME: 300000,  
+        }
+
+        // ========= 状态变量 =========
+        let attempts = 0;
+        let isLocked = false;
+
+        // ========= 核心功能 =========
+        async function verifyAccess() {
+            if (isLocked) {
+                showMessage("🔒 系统已锁定，请稍后再试");
+                return;
+            }
+
+            const stuNum = parseInt(document.getElementById('stuNumber').value);
+            const secret = document.getElementById('secretCode').value;
+            const statusEl = document.getElementById('statusMsg');
+
+            // 输入验证
+            if (!validateInput(stuNum, secret)) return;
+
+            // 密码验证
+            if (secret !== SYSTEM_CONFIG.PASSWORD) {
+                handleFailedAttempt();
+                return;
+            }
+
+            // 验证通过
+            attempts = 0;
+            loadMessages(stuNum);
+        }
+
+        function validateInput(number, password) {
+            const statusEl = document.getElementById('statusMsg');
+            statusEl.textContent = "";
+
+            if (isNaN(number) || number < 1 || number > 59) {
+                statusEl.textContent = "⚠️ 请输入有效学号 (1-59)（老师请按：语=57、数=58、英=59）";
+                return false;
+            }
+
+            if (password.length !== 6 || !/^\d+$/.test(password)) {
+                statusEl.textContent = "⚠️ 密码必须是6位数字";
+                return false;
+            }
+
+            return true;
+        }
+
+        function handleFailedAttempt() {
+            attempts++;
+            const remaining = SYSTEM_CONFIG.MAX_ATTEMPTS - attempts;
+            
+            if (remaining > 0) {
+                showMessage(`❌ 密码错误 (剩余尝试次数: ${remaining})`);
+            } else {
+                isLocked = true;
+                showMessage("🔒 系统已锁定，5分钟后自动解锁");
+                setTimeout(() => {
+                    isLocked = false;
+                    attempts = 0;
+                    showMessage("✅ 系统已解锁，请重试");
+                }, SYSTEM_CONFIG.LOCK_TIME);
+            }
+        }
+
+        async function loadMessages(studentNumber) {
+            // 切换界面
+            document.getElementById('loginPage').style.display = 'none';
+            document.getElementById('messagePage').style.display = 'block';
+            const container = document.getElementById('messageList');
+            
+            // 显示加载状态
+            container.innerHTML = '<div class="loader"></div>';
+
+            try {
+                const response = await fetch(`messages/${studentNumber}.txt`);
+                
+                if (!response.ok) throw new Error('留言加载失败');
+                
+                const data = await response.text();
+                displayMessages(data);
+            } catch (error) {
+                container.innerHTML = `
+                    <div class="error-msg">
+                        😢 加载失败: ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        function displayMessages(rawText) {
+            const container = document.getElementById('messageList');
+            const messages = rawText.split('\n').filter(line => line.trim());
+
+            container.innerHTML = messages.length > 0 
+                ? messages.map(msg => `
+                    <div class="message-card">
+                        <div class="message-author">📌 ${msg.split('：')[0]}</div>
+                        <div>${msg.split('：')[1] || '（空白留言）'}</div>
+                    </div>
+                  `).join('')
+                : '<div class="message-card">📭 暂时没有留言</div>';
+        }
+
+        function returnToLogin() {
+            document.getElementById('loginPage').style.display = 'block';
+            document.getElementById('messagePage').style.display = 'none';
+            document.getElementById('stuNumber').value = '';
+            document.getElementById('secretCode').value = '';
+        }
+
+        function showMessage(text) {
+            const statusEl = document.getElementById('statusMsg');
+            statusEl.textContent = text;
+            setTimeout(() => statusEl.textContent = '', 3000);
+        }
+    </script>
+</body>
+</html>
