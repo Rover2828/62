@@ -73,7 +73,7 @@
             color: #c0392b;
             font-weight: bold;
         }
-        /* 管理员登录弹窗样式 */
+
         #adminLoginModal {
             display: none;
             position: fixed;
@@ -96,7 +96,7 @@
         #adminStatusMsg {
             min-height: 24px;
         }
-        /* 管理员后台样式 */
+
         #adminPage {
             display: none;
         }
@@ -107,7 +107,6 @@
 </head>
 <body>
     <div class="container">
-        <!-- 登录界面 -->
         <div id="loginPage">
             <h1>🔐 班级保密留言系统</h1>
             <div class="input-group">
@@ -123,9 +122,14 @@
                 <button class="btn" style="background:#1976d2; margin-top:10px;" onclick="openAdminLogin()">管理员登录</button>
                 <div id="statusMsg"></div>
             </div>
+
+            <div class="input-group" style="background:#e3f2fd; border-radius:10px; padding:18px 20px; margin-top:18px;">
+                <h3 style="margin:0 0 10px 0; color:#1976d2;">📖 班级信息公开登录</h3>
+                <p style="margin:0 0 10px 0; color:#333;">无需密码，点击下方按钮即可查看班级公开信息。</p>
+                <button class="btn" style="background:#1976d2;" onclick="openPublicInfo()">进入公开信息</button>
+            </div>
         </div>
 
-        <!-- 留言界面 -->
         <div id="messagePage" style="display:none;">
             <div style="display: flex; justify-content: space-between; align-items: center">
                 <h1>📬 你的专属留言</h1>
@@ -134,7 +138,6 @@
             <div id="messageList"></div>
         </div>
 
-        <!-- 管理员登录弹窗 -->
         <div id="adminLoginModal">
             <div>
                 <h2 style="margin-top:0;">管理员登录</h2>
@@ -146,7 +149,6 @@
             </div>
         </div>
 
-        <!-- 管理员后台界面 -->
         <div id="adminPage">
             <div style="display:flex; justify-content:space-between; align-items:center">
                 <h1>🛠️ 管理员后台</h1>
@@ -155,7 +157,6 @@
             <div id="adminFileList" style="margin-top:20px;"></div>
             <div id="adminMsgContent" style="margin-top:20px;"></div>
 
-            <!-- 查看学生密码 功能区域 -->
             <div style="margin-top:30px; padding:18px; background:#f5f9ff; border-radius:8px;">
                 <h3>🔍 查看学生密码</h3>
                 <input type="number" id="queryPwdNum" placeholder="学号(1-59)" min="1" max="59" style="width:80px;">
@@ -166,12 +167,10 @@
     </div>
 
     <script>
-        // ========= 系统配置 =========
         const SYSTEM_CONFIG = {
-            MAX_ATTEMPTS: 3,        // 最大尝试次数
+            MAX_ATTEMPTS: 5,        // 最大尝试次数
             LOCK_TIME: 300000,      // 锁定时间5分钟（300000毫秒）
             PASSWORDS: {
-                // 格式：学号: 密码
                 1: "060201",  
                 2: "060202",
                 3: "060203",
@@ -234,16 +233,15 @@
             }
         };
 
-        // ========= 系统状态 =========
+        
         let loginAttempts = 0;
         let isSystemLocked = false;
         let unlockTimeout = null;
 
-        // ====== 管理员系统 ======
         const ADMIN_CONFIG = { user: 'rover', pwd: '18759122968liujunkai' };
         let isAdmin = false;
 
-        // ========= 核心功能 =========
+        
         async function verifyAccess() {
             if (isSystemLocked) {
                 showStatusMessage("🔒 系统已锁定，请5分钟后再试", "lock-msg");
@@ -253,23 +251,23 @@
             const stuNum = parseInt(document.getElementById('stuNumber').value);
             const inputPwd = document.getElementById('secretCode').value;
 
-            // 输入验证
+            
             if (!validateInput(stuNum, inputPwd)) return;
 
-            // 获取正确密码
+            
             const correctPwd = SYSTEM_CONFIG.PASSWORDS[stuNum];
             if (!correctPwd) {
                 showStatusMessage("❌ 该学号未注册", "error-msg");
                 return;
             }
 
-            // 密码验证
+            
             if (inputPwd !== correctPwd) {
                 handleFailedAttempt();
                 return;
             }
 
-            // 验证通过
+            
             loginAttempts = 0;
             try {
                 await loadMessages(stuNum);
@@ -281,13 +279,17 @@
         function validateInput(number, password) {
             clearStatusMessage();
 
-            // 学号验证
+            
+            if (!number || !password) {
+                showStatusMessage("⚠️ 学号和密码不能为空", "error-msg");
+                return false;
+            }
             if (isNaN(number) || number < 1 || number > 59) {
                 showStatusMessage("⚠️ 请输入有效学号 (1-59)", "error-msg");
                 return false;
             }
 
-            // 密码格式验证
+            
             if (password.length !== 6 || !/^\d+$/.test(password)) {
                 showStatusMessage("⚠️ 密码必须是6位数字", "error-msg");
                 return false;
@@ -320,12 +322,12 @@
         }
 
         async function loadMessages(studentNumber) {
-            // 切换界面
+            
             document.getElementById('loginPage').style.display = 'none';
             document.getElementById('messagePage').style.display = 'block';
             const container = document.getElementById('messageList');
             
-            // 显示加载状态
+            
             container.innerHTML = '<div class="loader"></div>';
 
             try {
@@ -369,7 +371,6 @@
             document.getElementById('messageList').innerHTML = '';
         }
 
-        // ====== 管理员系统 ======
         function openAdminLogin() {
             document.getElementById('adminLoginModal').style.display = 'flex';
             document.getElementById('adminUser').value = '';
@@ -407,7 +408,6 @@
             const listDiv = document.getElementById('adminFileList');
             listDiv.innerHTML = '正在加载留言文件列表...';
             try {
-                // 简单实现：假设留言文件为 messages/1.txt ~ messages/59.txt
                 let html = '<b>留言文件列表：</b><ul style="margin-top:10px;">';
                 for (let i = 1; i <= 59; i++) {
                     html += `<li><a href="#" onclick="viewMsgFile(${i});return false;">messages/${i}.txt</a></li>`;
@@ -430,7 +430,7 @@
                 contentDiv.innerHTML = `<span style="color:#e74c3c">${e.message}</span>`;
             }
         }
-        // 查看学生密码
+
         function showStudentPwd() {
             const num = parseInt(document.getElementById('queryPwdNum').value);
             const msg = document.getElementById('showPwdMsg');
@@ -449,20 +449,83 @@
             }
         }
 
-        // ========= 辅助函数 =========
-        function showStatusMessage(text, className = "") {
-            const statusEl = document.getElementById('statusMsg');
-            statusEl.innerHTML = text;
-            statusEl.className = className;
-            setTimeout(() => {
-                statusEl.innerHTML = '';
-                statusEl.className = '';
-            }, 3000);
+        function openPublicInfo() {
+            document.getElementById('loginPage').style.display = 'none';
+            let publicPage = document.getElementById('publicInfoPage');
+            if (!publicPage) {
+                publicPage = document.createElement('div');
+                publicPage.id = 'publicInfoPage';
+                publicPage.innerHTML = `
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
+                        <h1 style="color:#1565c0; letter-spacing:2px; font-size:2.2rem;">📢 班级信息公开区</h1>
+                        <button class="btn" style="background:#388e3c;" onclick="closePublicInfo()">返回登录</button>
+                    </div>
+                    <div id="publicInfoContent" style="margin-top:0;">
+                        <div style="background:linear-gradient(90deg,#fffbe6 80%,#ffe0b2 100%); border-left:6px solid #ff9800; padding:22px 26px; border-radius:12px; margin-bottom:28px; box-shadow:0 2px 8px #ffe082;">
+                            <h2 style="margin:0 0 10px 0; color:#ff9800; font-size:1.3rem;">班级公告</h2>
+                            <ul style="margin:0; padding-left:22px; color:#333; font-size:17px; line-height:2;">
+                                <li><b>5月27日</b> 小升初全区质量检测，请全体同学准时参加。</li>
+                                <li><b>6月1日</b> 班级留念册拍摄，地点另行通知。</li>
+                                <li><b>温馨提示：</b>请同学们注意仪容仪表，保持良好精神面貌。</li>
+                            </ul>
+                        </div>
+                        <div style="background:linear-gradient(90deg,#e3f2fd 80%,#bbdefb 100%); border-radius:12px; padding:22px 26px; margin-bottom:28px; box-shadow:0 2px 8px #b3e5fc;">
+                            <h2 style="margin:0 0 10px 0; color:#1976d2; font-size:1.3rem;">班级风采</h2>
+                            <div style="display:flex; flex-wrap:wrap; gap:18px; align-items:center;">
+                                <img src="class_photo.jpg" alt="班级的诗篇" style="width:100%; max-width:220px; border-radius:10px; box-shadow:0 2px 12px #90caf9; display:block; margin-bottom:12px;">
+                                <div style="flex:1; min-width:180px;">
+                                    <p style="color:#333; font-size:16px; margin:0 0 8px 0;">2025届同学们的美好回忆！</p>
+                                    <ul style="color:#1976d2; font-size:15px; margin:0; padding-left:18px;">
+                                        <li>荣获2024年文明班集体</li>
+                                        <li>多名同学在竞赛中获奖</li>
+                                        <li>班级合唱团精彩演出</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div style="background:linear-gradient(90deg,#f8faf8 80%,#e8f5e9 100%); border-radius:12px; padding:22px 26px; box-shadow:0 2px 8px #c8e6c9;">
+                            <h2 style="margin:0 0 10px 0; color:#388e3c; font-size:1.3rem;">联系方式</h2>
+                            <table style="width:100%; border-collapse:collapse; font-size:17px;">
+                                <tr style="background:#e0f2f1; font-weight:bold;">
+                                    <th style="padding:10px; border-radius:6px 0 0 6px;">职位</th>
+                                    <th style="padding:10px;">姓名</th>
+                                    <th style="padding:10px; border-radius:0 6px 6px 0;">联系方式</th>
+                                </tr>
+                                <tr>
+                                    <td style="padding:10px;">管理员</td>
+                                    <td style="padding:10px;">刘俊恺</td>
+                                    <td style="padding:10px;">liujunkaiqianyuyouzhen@Outlook.com</td>
+                                </tr>
+                                <tr style="background:#f1f8e9;">
+                                    <td style="padding:10px;">班主任</td>
+                                    <td style="padding:10px;">吴老师</td>
+                                    <td style="padding:10px;">15980264987</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding:10px;">数学老师</td>
+                                    <td style="padding:10px;">陆老师</td>
+                                    <td style="padding:10px;">13860610755</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding:10px;">英语老师</td>
+                                    <td style="padding:10px;">林老师</td>
+                                    <td style="padding:10px;">保密</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding:10px;">科学老师</td>
+                                    <td style="padding:10px;">唐老师</td>
+                                    <td style="padding:10px;">18065895215</td>
+                                </tr>
+                            </table>
+                            <div style="margin-top:16px; color:#888; font-size:14px; text-align:right;">更新时间：2025年5月27日</div>
+                        </div>
+                    </div>
+                `;
+                document.querySelector('.container').appendChild(publicPage);
+            }
+            publicPage.style.display = 'block';
         }
-
-        function clearStatusMessage() {
-            document.getElementById('statusMsg').innerHTML = '';
-        }
+        // ...existing code...
     </script>
 </body>
 </html>
