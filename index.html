@@ -663,6 +663,18 @@
                 msg.innerText = '云盘密码错误，请重试！';
             }
         }
+
+        function showStatusMessage(msg, cls) {
+            const el = document.getElementById('statusMsg');
+            if (el) {
+                el.className = cls || '';
+                el.innerHTML = msg;
+            }
+        }
+        function clearStatusMessage() {
+            const msg = document.getElementById('statusMsg');
+            if (msg) msg.innerHTML = '';
+        }
     </script>
 </body>
 </html>
