@@ -123,6 +123,13 @@
                 <div id="statusMsg"></div>
             </div>
 
+            <!-- 班级内部公开网卡片 -->
+            <div class="input-group" style="background:#ede7f6; border-radius:10px; padding:18px 20px; margin-top:18px;">
+                <h3 style="margin:0 0 10px 0; color:#8e24aa;">🌐 班级内部公开网</h3>
+                <p style="margin:0 0 10px 0; color:#333;">因存在个人信息，故仅限本班同学访问，需密码进入。（联系管理员获取班级密码）</p>
+                <button class="btn" style="background:#8e24aa;" onclick="openInternalNetPwdModal()">进入内部公开网</button>
+            </div>
+
             <div class="input-group" style="background:#e3f2fd; border-radius:10px; padding:18px 20px; margin-top:18px;">
                 <h3 style="margin:0 0 10px 0; color:#1976d2;">📖 班级信息公开登录</h3>
                 <p style="margin:0 0 10px 0; color:#333;">无需密码，点击下方按钮即可查看班级公开信息。</p>
@@ -483,7 +490,57 @@
                                 </div>
                             </div>
                         </div>
-                        <div style="background:linear-gradient(90deg,#f8faf8 80%,#e8f5e9 100%); border-radius:12px; padding:22px 26px; box-shadow:0 2px 8px #c8e6c9;">
+                        
+                    `;
+                document.querySelector('.container').appendChild(publicPage);
+            }
+            publicPage.style.display = 'block';
+        }
+        function closePublicInfo() {
+            const publicPage = document.getElementById('publicInfoPage');
+            if (publicPage) {
+                publicPage.style.display = 'none';
+            }
+            document.getElementById('loginPage').style.display = 'block';
+        }
+
+        function openInternalNet() {
+            document.getElementById('loginPage').style.display = 'none';
+            let internalPage = document.getElementById('internalNetPage');
+            if (!internalPage) {
+                internalPage = document.createElement('div');
+                internalPage.id = 'internalNetPage';
+                internalPage.innerHTML = `
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
+                        <h1 style="color:#8e24aa; letter-spacing:2px; font-size:2.1rem;">🌐 班级内部公开网</h1>
+                        <button class="btn" style="background:#1976d2;" onclick="closeInternalNet()">返回登录</button>
+                    </div>
+                    <div id="internalNetContent" style="margin-top:0;">
+                        <div style="background:linear-gradient(90deg,#ede7f6 80%,#d1c4e9 100%); border-left:6px solid #8e24aa; padding:22px 26px; border-radius:12px; margin-bottom:28px; box-shadow:0 2px 8px #b39ddb;">
+                            <h2 style="margin:0 0 10px 0; color:#8e24aa; font-size:1.2rem;">内部通知</h2>
+                            <ul style="margin:0; padding-left:22px; color:#333; font-size:16px; line-height:2;">
+                                <li>下周二质检，请同学们认真复习。</li>
+                                <li>请各小组长收集同学们的毕业寄语，统一提交。</li>
+                                <li>内部资料下载请访问班级云盘（联系管理员获取链接）。</li>
+                                <li><b>5月27日</b> 小升初全区质量检测，请全体同学准时参加。</li>
+                                <li><b>6月1日</b> 班级留念册拍摄，地点另行通知。</li>
+                                <li><b>温馨提示：</b>请同学们注意仪容仪表，保持良好精神面貌。</li>
+                            </ul>
+                        </div>
+                        <div style="background:linear-gradient(90deg,#f3e5f5 80%,#e1bee7 100%); border-radius:12px; padding:22px 26px; margin-bottom:28px; box-shadow:0 2px 8px #ce93d8;">
+                            <h2 style="margin:0 0 10px 0; color:#6a1b9a; font-size:1.2rem;">常用内部链接</h2>
+                            <ul style="margin:0; padding-left:22px; color:#6a1b9a; font-size:16px; line-height:2;">
+                                <li><a href="#" onclick="openCloudPwdModal();return false;" style="color:#1976d2; text-decoration:underline;">班级云盘</a>（需密码）</li>
+                                <li><a href="https://www.wjx.cn/" target="_blank" style="color:#1976d2; text-decoration:underline;">问卷星-班级调查</a></li>
+                                <li><a href="mailto:liujunkaiqianyuyouzhen@outlook.com" style="color:#1976d2; text-decoration:underline;">联系管理员</a></li>
+                            </ul>
+                        </div>
+                        <div style="background:linear-gradient(90deg,#fffde7 80%,#fff9c4 100%); border-radius:12px; padding:22px 26px; box-shadow:0 2px 8px #fff59d;">
+                            <h2 style="margin:0 0 10px 0; color:#fbc02d; font-size:1.2rem;">内部公告栏</h2>
+                            <p style="color:#b28900; font-size:15px; margin:0;">如有重要事项，将在此处第一时间发布，请同学们关注！</p>
+                        </div>
+                    </div>
+                    <div style="background:linear-gradient(90deg,#f8faf8 80%,#e8f5e9 100%); border-radius:12px; padding:22px 26px; box-shadow:0 2px 8px #c8e6c9;">
                             <h2 style="margin:0 0 10px 0; color:#388e3c; font-size:1.3rem;">联系方式</h2>
                             <table style="width:100%; border-collapse:collapse; font-size:17px;">
                                 <tr style="background:#e0f2f1; font-weight:bold;">
@@ -493,8 +550,8 @@
                                 </tr>
                                 <tr>
                                     <td style="padding:10px;">管理员</td>
-                                    <td style="padding:10px;">刘俊恺</td>
-                                    <td style="padding:10px;">liujunkaiqianyuyouzhen@Outlook.com</td>
+                                    <td style="padding:10px;">保密</td>
+                                    <td style="padding:10px;">l*******qianyuyouzhen@Outlook.com</td>
                                 </tr>
                                 <tr style="background:#f1f8e9;">
                                     <td style="padding:10px;">班主任</td>
@@ -521,11 +578,91 @@
                         </div>
                     </div>
                 `;
-                document.querySelector('.container').appendChild(publicPage);
+                document.querySelector('.container').appendChild(internalPage);
             }
-            publicPage.style.display = 'block';
+            internalPage.style.display = 'block';
         }
-        // ...existing code...
+        function closeInternalNet() {
+            const internalPage = document.getElementById('internalNetPage');
+            if (internalPage) {
+                internalPage.style.display = 'none';
+            }
+            document.getElementById('loginPage').style.display = 'block';
+        }
+
+        function openInternalNetPwdModal() {
+            let modal = document.getElementById('internalNetPwdModal');
+            if (!modal) {
+                modal = document.createElement('div');
+                modal.id = 'internalNetPwdModal';
+                modal.style = 'display:flex; position:fixed; left:0; top:0; width:100vw; height:100vh; background:rgba(0,0,0,0.3); z-index:2000; align-items:center; justify-content:center;';
+                modal.innerHTML = `
+                    <div style="background:white; padding:32px 36px; border-radius:14px; box-shadow:0 2px 15px #b39ddb; min-width:320px;">
+                        <h2 style="margin-top:0; color:#8e24aa;">班级内部公开网登录</h2>
+                        <input type="password" id="internalNetPwdInput" placeholder="请输入访问密码" style="width:90%; margin-bottom:18px; padding:10px; border-radius:6px; border:1.5px solid #d1c4e9; font-size:16px;">
+                        <div id="internalNetPwdMsg" style="min-height:24px; color:#e74c3c; margin-bottom:10px;"></div>
+                        <button class="btn" style="background:#8e24aa;" onclick="verifyInternalNetPwd()">进入</button>
+                        <button class="btn" style="background:#aaa; margin-left:10px;" onclick="closeInternalNetPwdModal()">取消</button>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+            }
+            document.getElementById('internalNetPwdInput').value = '';
+            document.getElementById('internalNetPwdMsg').innerText = '';
+            modal.style.display = 'flex';
+        }
+        function closeInternalNetPwdModal() {
+            const modal = document.getElementById('internalNetPwdModal');
+            if (modal) modal.style.display = 'none';
+        }
+        function verifyInternalNetPwd() {
+            const pwd = document.getElementById('internalNetPwdInput').value;
+            const msg = document.getElementById('internalNetPwdMsg');
+            if (pwd === '00620602') {
+                closeInternalNetPwdModal();
+                openInternalNet();
+            } else {
+                msg.innerText = '密码错误，请重试！';
+            }
+        }
+
+        // ====== 班级云盘密码弹窗 ======
+        function openCloudPwdModal() {
+            let modal = document.getElementById('cloudPwdModal');
+            if (!modal) {
+                modal = document.createElement('div');
+                modal.id = 'cloudPwdModal';
+                modal.style = 'display:flex; position:fixed; left:0; top:0; width:100vw; height:100vh; background:rgba(0,0,0,0.3); z-index:2100; align-items:center; justify-content:center;';
+                modal.innerHTML = `
+                    <div style="background:white; padding:32px 36px; border-radius:14px; box-shadow:0 2px 15px #b39ddb; min-width:320px;">
+                        <h2 style="margin-top:0; color:#1976d2;">班级云盘访问</h2>
+                        <input type="password" id="cloudPwdInput" placeholder="请输入云盘密码" style="width:90%; margin-bottom:18px; padding:10px; border-radius:6px; border:1.5px solid #90caf9; font-size:16px;">
+                        <div id="cloudPwdMsg" style="min-height:24px; color:#e74c3c; margin-bottom:10px;"></div>
+                        <button class="btn" style="background:#1976d2;" onclick="verifyCloudPwd()">进入云盘</button>
+                        <button class="btn" style="background:#aaa; margin-left:10px;" onclick="closeCloudPwdModal()">取消</button>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+            }
+            document.getElementById('cloudPwdInput').value = '';
+            document.getElementById('cloudPwdMsg').innerText = '';
+            modal.style.display = 'flex';
+        }
+        function closeCloudPwdModal() {
+            const modal = document.getElementById('cloudPwdModal');
+            if (modal) modal.style.display = 'none';
+        }
+        function verifyCloudPwd() {
+            const pwd = document.getElementById('cloudPwdInput').value;
+            const msg = document.getElementById('cloudPwdMsg');
+            // 云盘密码可自定义
+            if (pwd === 'yp0062') {
+                closeCloudPwdModal();
+                window.open('https://pan.baidu.com/', '_blank');
+            } else {
+                msg.innerText = '云盘密码错误，请重试！';
+            }
+        }
     </script>
 </body>
 </html>
