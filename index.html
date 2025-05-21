@@ -789,11 +789,9 @@
                     <div style="background:#f5f9ff; border-radius:10px; padding:18px 20px; margin-bottom:24px; box-shadow:0 2px 8px #e3f2fd;">
                         <div style="font-size:15px; color:#1976d2; margin-bottom:8px;">欢迎进入留言系统，请文明留言。</div>
                         <div id="msgSysPanel" style="margin-bottom:12px; display:flex; flex-direction:column; gap:10px;">
-                            <div style=\"display:flex; gap:10px; align-items:center;\">
-                                <input type=\"number\" id=\"msgSysTargetNum\" placeholder=\"目标学号(1-59)\" min=\"1\" max=\"59\" style=\"width:110px; border-radius:8px; border:1.5px solid #90caf9; padding:8px; font-size:15px;\">
-                                <textarea id=\"msgSysInput\" rows=\"3\" placeholder=\"请输入你的留言...\" style=\"flex:1; border-radius:8px; border:1.5px solid #90caf9; padding:10px; font-size:15px; resize:vertical;\"></textarea>
-                            </div>
-                            <div style="display:flex; align-items:center; gap:10px;">
+                            <textarea id="msgSysInput" rows="3" placeholder="请输入你的留言..." style="width:100%; border-radius:8px; border:1.5px solid #90caf9; padding:10px; font-size:15px; resize:vertical;"></textarea>
+                            <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                                <input type="number" id="msgSysTargetNum" placeholder="发送到哪一个号数 (1-59)" min="1" max="59" style="width:160px; border:1.5px solid #90caf9; border-radius:8px; padding:8px; font-size:15px;">
                                 <button class="btn" style="background:#1976d2; min-width:110px;" onclick="submitMessageSystem()">提交留言</button>
                                 <span id="msgSysSubmitStatus" style="color:#388e3c;"></span>
                             </div>
@@ -807,7 +805,6 @@
             msgSysPage.setAttribute('data-stu', stuNum);
             document.getElementById('msgSysInput').value = '';
             document.getElementById('msgSysSubmitStatus').innerText = '';
-            document.getElementById('msgSysTargetNum').value = '';
             loadMsgSystemList(stuNum);
         }
         // 修复“返回系统”按钮无效问题
@@ -835,65 +832,28 @@
                 msgListPanel.innerHTML = '<div class="error-msg">😢 加载失败</div>';
             }
         }
-        // 提交留言（通过GitHub API创建issue）
+        // 提交留言（美化反馈）
         function submitMessageSystem() {
             const msgSysPage = document.getElementById('messageSystemPage');
             const stuNum = parseInt(msgSysPage.getAttribute('data-stu'));
             const msg = document.getElementById('msgSysInput').value.trim();
+            const targetNum = parseInt(document.getElementById('msgSysTargetNum').value);
             const status = document.getElementById('msgSysSubmitStatus');
-            let targetNum = document.getElementById('msgSysTargetNum');
-            if (!targetNum) {
-                status.style.color = '#e74c3c';
-                status.innerText = '页面异常，请刷新重试';
-                return;
-            }
-            targetNum = parseInt(targetNum.value);
             if (!msg) {
                 status.style.color = '#e74c3c';
                 status.innerText = '留言内容不能为空';
                 return;
             }
-            if (isNaN(targetNum) || targetNum < 1 || targetNum > 59) {
+            if (!targetNum || isNaN(targetNum) || targetNum < 1 || targetNum > 59) {
                 status.style.color = '#e74c3c';
-                status.innerText = '请输入有效的目标学号 (1-59)';
+                status.innerText = '请填写有效的目标号数 (1-59)';
                 return;
             }
-            // ====== GitHub API配置 ======
-            const GITHUB_TOKEN = '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'; 
-            const REPO_OWNER = 'rover2828';   
-            const REPO_NAME = '62';         
-            // ===========================
-            status.style.color = '#1976d2';
-            status.innerText = '正在发送留言...';
-            fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/issues`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': 'token ' + GITHUB_TOKEN,
-                    'Accept': 'application/vnd.github+json',
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    title: `来自${stuNum}号给${targetNum}号的留言`,
-                    body: msg,
-                    labels: [
-                        `to-${targetNum}`
-                    ]
-                })
-            }).then(async res => {
-                if (res.ok) {
-                    status.style.color = '#388e3c';
-                    status.innerText = '留言已成功发送到！';
-                    document.getElementById('msgSysInput').value = '';
-                    document.getElementById('msgSysTargetNum').value = '';
-                } else {
-                    const err = await res.json();
-                    status.style.color = '#e74c3c';
-                    status.innerText = '留言发送失败：' + (err.message || '请稍后重试');
-                }
-            }).catch(() => {
-                status.style.color = '#e74c3c';
-                status.innerText = '留言发送失败，请检查网络或联系管理员';
-            });
+            status.style.color = '#388e3c';
+            status.innerHTML = '<span style="font-weight:bold;">留言已提交（演示，未真正保存）</span> <span style="color:#888; font-size:13px;">如需真正保存请联系管理员</span>';
+            document.getElementById('msgSysInput').value = '';
+            document.getElementById('msgSysTargetNum').value = '';
+            loadMsgSystemList(stuNum);
         }
     </script>
 </body>
