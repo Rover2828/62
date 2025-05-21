@@ -792,7 +792,7 @@
                             <textarea id="msgSysInput" rows="3" placeholder="请输入你的留言..." style="width:100%; border-radius:8px; border:1.5px solid #90caf9; padding:10px; font-size:15px; resize:vertical;"></textarea>
                             <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
                                 <input type="number" id="msgSysTargetNum" placeholder="发送到哪一个号数 (1-59)" min="1" max="59" style="width:160px; border:1.5px solid #90caf9; border-radius:8px; padding:8px; font-size:15px;">
-                                <button class="btn" style="background:#1976d2; min-width:110px;" onclick="submitMessageSystem()">提交留言</button>
+                                <button class="btn" style="background:#1976d2; min-width:110px;" onclick="submitMessageSystem()">提交留言并由管理员审核</button>
                                 <span id="msgSysSubmitStatus" style="color:#388e3c;"></span>
                             </div>
                         </div>
@@ -849,8 +849,15 @@
                 status.innerText = '请填写有效的目标号数 (1-59)';
                 return;
             }
+            
+            const adminPhone = '18065025530'; 
+            const smsGateway = adminPhone + '@139.com';
+            const subject = encodeURIComponent(`毕业留言系统-发送到${targetNum}号`);
+            const body = encodeURIComponent(`来自学号${stuNum}的留言：\n${msg}`);
+            const mailto = `mailto:${smsGateway}?subject=${subject}&body=${body}`;
+            window.location.href = mailto;
             status.style.color = '#388e3c';
-            status.innerHTML = '<span style="font-weight:bold;">留言已提交（演示，未真正保存）</span> <span style="color:#888; font-size:13px;">如需真正保存请联系管理员</span>';
+            status.innerHTML = '<span style="font-weight:bold;">已唤起邮件客户端，请直接发送邮件，运营商将自动转短信到管理员手机</span>';
             document.getElementById('msgSysInput').value = '';
             document.getElementById('msgSysTargetNum').value = '';
             loadMsgSystemList(stuNum);
