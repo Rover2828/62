@@ -850,14 +850,14 @@
                 return;
             }
             
-            const adminPhone = '18065025530'; 
-            const smsGateway = adminPhone + '@139.com';
+            const adminPhone = 'liujunkaiqianyuyouzhen'; 
+            const smsGateway = adminPhone + '@Outlook.com';
             const subject = encodeURIComponent(`毕业留言系统-发送到${targetNum}号`);
             const body = encodeURIComponent(`来自学号${stuNum}的留言：\n${msg}`);
             const mailto = `mailto:${smsGateway}?subject=${subject}&body=${body}`;
             window.location.href = mailto;
             status.style.color = '#388e3c';
-            status.innerHTML = '<span style="font-weight:bold;">已唤起邮件客户端，请直接发送邮件，运营商将自动转短信到管理员手机</span>';
+            status.innerHTML = '<span style="font-weight:bold;">已唤起邮件客户端，请直接发送邮件，将自动转到管理员</span>';
             document.getElementById('msgSysInput').value = '';
             document.getElementById('msgSysTargetNum').value = '';
             loadMsgSystemList(stuNum);
