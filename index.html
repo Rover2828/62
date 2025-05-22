@@ -243,79 +243,55 @@
     </div>
 
     <script>
-        const SYSTEM_CONFIG = {
-            MAX_ATTEMPTS: 5,        // 最大尝试次数
-            LOCK_TIME: 300000,      // 锁定时间5分钟（300000毫秒）
-            PASSWORDS: {
-                1: "060201",  
-                2: "060202",
-                3: "060203",
-                4: "060204",
-                5: "060205",
-                6: "060206",
-                7: "060207",
-                8: "060208",
-                9: "060209",
-                10: "060210",
-                11: "060211",
-                12: "060212",
-                13: "060213",
-                14: "060214",
-                15: "060215",
-                16: "060216",
-                17: "060217",
-                18: "060218",
-                19: "060219",
-                20: "060220",
-                21: "060221",
-                22: "060222",
-                23: "060223",
-                24: "060224",
-                25: "060225",
-                26: "060226",
-                27: "060227",
-                28: "060228",
-                29: "060229",
-                30: "060230",
-                31: "060231",
-                32: "060232",
-                33: "060233",
-                34: "060234",
-                35: "060235",
-                36: "060236",
-                37: "060237",
-                38: "060238",
-                39: "060239",
-                40: "060240",
-                41: "060241",
-                42: "060242",
-                43: "060243",
-                44: "060244",
-                45: "060245",
-                46: "060246",
-                47: "060247",
-                48: "060248",
-                49: "060249",
-                50: "060250",
-                51: "060251",
-                52: "060252",
-                53: "060253",
-                54: "060254",
-                55: "060255",
-                56: "060256",
-                57: "060257",
-                58: "060258",
-                59: "060259"   
-            }
-        };
+        // 移除原有密码配置
+        // const SYSTEM_CONFIG = { ... }
+        // const ADMIN_CONFIG = { ... }
 
-        
+        let userPasswords = {};
+let adminAccount = { user: '', pwd: '' };
+
+// 初始化时加载密码
+async function loadUserPasswords() {
+    try {
+        const res = await fetch('my/yhmy.txt?_=' + Date.now());
+        if (!res.ok) throw new Error('无法加载用户密码文件，检查网络连接');
+        const txt = await res.text();
+        userPasswords = {};
+        txt.split('\n').forEach(function(line) {
+            var arr = line.split(':');
+            if(arr.length === 2) userPasswords[parseInt(arr[0])] = arr[1].trim();
+        });
+    } catch (e) {
+        userPasswords = {};
+    }
+}
+async function loadAdminAccount() {
+    try {
+        const res = await fetch('my/glymy.txt?_=' + Date.now());
+        if (!res.ok) throw new Error('无法加载管理员密码文件，检查网络连接');
+        const txt = await res.text();
+        var arr = txt.split(':');
+        if(arr.length === 2) adminAccount = { user: arr[0].trim(), pwd: arr[1].trim() };
+    } catch (e) {
+        adminAccount = { user: '', pwd: '' };
+    }
+}
+
+// 页面加载时预加载密码
+window.addEventListener('DOMContentLoaded', function() {
+    loadUserPasswords();
+    loadAdminAccount();
+});
+
         let loginAttempts = 0;
         let isSystemLocked = false;
         let unlockTimeout = null;
 
-        const ADMIN_CONFIG = { user: 'rover', pwd: '18759122968liujunkai' };
-        let isAdmin = false;
+        // 移除原有密码配置
+        // const SYSTEM_CONFIG = { ... }
+        // const ADMIN_CONFIG = { ... }
+
+        
 
         
         async function verifyAccess() {
@@ -323,32 +299,27 @@
                 showStatusMessage("🔒 系统已锁定，请5分钟后再试", "lock-msg");
                 return;
             }
-
-            const stuNum = parseInt(document.getElementById('stuNumber').value);
-            const inputPwd = document.getElementById('secretCode').value;
-
-            
+            var stuNum = parseInt(document.getElementById('stuNumber').value);
+            var inputPwd = document.getElementById('secretCode').value;
             if (!validateInput(stuNum, inputPwd)) return;
-
-            
-            const correctPwd = SYSTEM_CONFIG.PASSWORDS[stuNum];
+            // 动态读取密码
+            if (!userPasswords[stuNum]) {
+                await loadUserPasswords();
+            }
+            var correctPwd = userPasswords[stuNum];
             if (!correctPwd) {
                 showStatusMessage("❌ 该学号未注册", "error-msg");
                 return;
             }
-
-            
             if (inputPwd !== correctPwd) {
                 handleFailedAttempt();
                 return;
             }
-
-            
             loginAttempts = 0;
             try {
                 await loadMessages(stuNum);
             } catch (error) {
-                showStatusMessage(`😢 加载失败: ${error.message}`, "error-msg");
+                showStatusMessage('😢 加载失败: ' + error.message, "error-msg");
             }
         }
 
@@ -457,15 +428,28 @@
             document.getElementById('adminLoginModal').style.display = 'none';
         }
         function verifyAdmin() {
-            const user = document.getElementById('adminUser').value.trim();
-            const pwd = document.getElementById('adminPwd').value;
-            const msg = document.getElementById('adminStatusMsg');
-            if (user === ADMIN_CONFIG.user && pwd === ADMIN_CONFIG.pwd) {
-                isAdmin = true;
-                closeAdminLogin();
-                showAdminPage();
+            var user = document.getElementById('adminUser').value.trim();
+            var pwd = document.getElementById('adminPwd').value;
+            var msg = document.getElementById('adminStatusMsg');
+            // 动态读取管理员账号
+            if (!adminAccount.user || !adminAccount.pwd) {
+                loadAdminAccount().then(function() {
+                    if (user === adminAccount.user && pwd === adminAccount.pwd) {
+                        isAdmin = true;
+                        closeAdminLogin();
+                        showAdminPage();
+                    } else {
+                        msg.innerHTML = '<span style="color:#e74c3c">账号或密码错误</span>';
+                    }
+                });
             } else {
-                msg.innerHTML = '<span style="color:#e74c3c">账号或密码错误</span>';
+                if (user === adminAccount.user && pwd === adminAccount.pwd) {
+                    isAdmin = true;
+                    closeAdminLogin();
+                    showAdminPage();
+                } else {
+                    msg.innerHTML = '<span style="color:#e74c3c">账号或密码错误</span>';
+                }
             }
         }
         function showAdminPage() {
@@ -508,21 +492,20 @@
         }
 
         function showStudentPwd() {
-            const num = parseInt(document.getElementById('queryPwdNum').value);
-            const msg = document.getElementById('showPwdMsg');
+            var num = parseInt(document.getElementById('queryPwdNum').value);
+            var msg = document.getElementById('showPwdMsg');
             if (isNaN(num) || num < 1 || num > 59) {
                 msg.style.color = '#e74c3c';
                 msg.innerText = '学号无效';
                 return;
             }
-            const pwd = SYSTEM_CONFIG.PASSWORDS[num];
-            if (pwd) {
-                msg.style.color = '#1976d2';
-                msg.innerText = `学号${num}的密码为：${pwd}`;
-            } else {
+            if (!userPasswords[num]) {
                 msg.style.color = '#e74c3c';
                 msg.innerText = '该学号未设置密码';
+                return;
             }
+            msg.style.color = '#1976d2';
+            msg.innerText = '学号' + num + '的密码为：' + userPasswords[num];
         }
 
         function openPublicInfo() {
@@ -746,9 +729,9 @@
 
         // 留言系统入口身份校验与页面跳转
         function enterMsgSystem() {
-            const stuNum = parseInt(document.getElementById('msgStuNumber').value);
-            const pwd = document.getElementById('msgPwd').value;
-            const status = document.getElementById('msgEntryStatus');
+            var stuNum = parseInt(document.getElementById('msgStuNumber').value);
+            var pwd = document.getElementById('msgPwd').value;
+            var status = document.getElementById('msgEntryStatus');
             status.innerText = '';
             if (!stuNum || !pwd) {
                 status.innerText = '学号和密码不能为空';
@@ -762,13 +745,23 @@
                 status.innerText = '密码必须是6位数字';
                 return;
             }
-            const correctPwd = SYSTEM_CONFIG.PASSWORDS[stuNum];
-            if (!correctPwd || pwd !== correctPwd) {
-                status.innerText = '学号或密码错误';
-                return;
+            if (!userPasswords[stuNum]) {
+                loadUserPasswords().then(function() {
+                    var correctPwd = userPasswords[stuNum];
+                    if (!correctPwd || pwd !== correctPwd) {
+                        status.innerText = '学号或密码错误';
+                        return;
+                    }
+                    openMessageSystemPage(stuNum);
+                });
+            } else {
+                var correctPwd = userPasswords[stuNum];
+                if (!correctPwd || pwd !== correctPwd) {
+                    status.innerText = '学号或密码错误';
+                    return;
+                }
+                openMessageSystemPage(stuNum);
             }
-            // 校验通过，跳转到留言系统专用页面
-            openMessageSystemPage(stuNum);
         }
 
         // 打开留言系统专用页面（美化+功能增强）
