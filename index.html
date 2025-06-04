@@ -203,6 +203,14 @@
                     <p style="color:#6a1b9a; font-size:15px; margin-bottom:18px; text-align:center;">需密码，含内部通知、资料、联系方式</p>
                     <button class="btn" style="background:#8e24aa; width:100%; font-size:16px; letter-spacing:1px;" onclick="openInternalNetPwdModal()">进入</button>
                 </div>
+                <div style="flex:1; max-width:340px; background:linear-gradient(135deg,#e8f5e9 80%,#c8e6c9 100%); border-radius:16px; padding:28px 24px 22px 24px; box-shadow:0 4px 18px #a5d6a7; display:flex; flex-direction:column; align-items:center; transition:transform 0.2s; border:2px solid #a5d6a7;">
+                    <div style="width:60px; height:60px; background:#fff; border-radius:50%; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 8px #a5d6a7; margin-bottom:12px;">
+                        <span style="font-size:2.2rem; color:#388e3c;">🧑‍🎓</span>
+                    </div>
+                    <h3 style="margin:0 0 10px 0; color:#388e3c; font-size:1.25rem; letter-spacing:1px;">学生内部公开网</h3>
+                    <p style="color:#388e3c; font-size:15px; margin-bottom:18px; text-align:center;">需密码，部分学号禁止访问</p>
+                    <button class="btn" style="background:#388e3c; width:100%; font-size:16px; letter-spacing:1px;" onclick="openStudentInternalNetPwdModal()">进入</button>
+                </div>
             </div>
         </div>
 
@@ -670,6 +678,7 @@ window.addEventListener('DOMContentLoaded', function() {
         function verifyInternalNetPwd() {
             const pwd = document.getElementById('internalNetPwdInput').value;
             const msg = document.getElementById('internalNetPwdMsg');
+            // 云盘密码可自定义
             if (pwd === '00620602') {
                 closeInternalNetPwdModal();
                 openInternalNet();
@@ -854,6 +863,122 @@ window.addEventListener('DOMContentLoaded', function() {
             document.getElementById('msgSysInput').value = '';
             document.getElementById('msgSysTargetNum').value = '';
             loadMsgSystemList(stuNum);
+        }
+
+        function openStudentInternalNetPwdModal() {
+            let modal = document.getElementById('studentInternalNetPwdModal');
+            if (!modal) {
+                modal = document.createElement('div');
+                modal.id = 'studentInternalNetPwdModal';
+                modal.style = 'display:flex; position:fixed; left:0; top:0; width:100vw; height:100vh; background:rgba(0,0,0,0.3); z-index:2200; align-items:center; justify-content:center;';
+                modal.innerHTML = `
+                    <div style="background:white; padding:32px 36px; border-radius:14px; box-shadow:0 2px 15px #a5d6a7; min-width:320px;">
+                        <h2 style="margin-top:0; color:#388e3c;">学生内部公开网登录</h2>
+                        <input type="number" id="studentInternalNetNum" placeholder="学号(1-56)" min="1" max="56" style="width:90%; margin-bottom:12px; padding:10px; border-radius:6px; border:1.5px solid #a5d6a7; font-size:16px;">
+                        <input type="password" id="studentInternalNetPwdInput" placeholder="请输入访问密码" style="width:90%; margin-bottom:18px; padding:10px; border-radius:6px; border:1.5px solid #a5d6a7; font-size:16px;">
+                        <div id="studentInternalNetPwdMsg" style="min-height:24px; color:#e74c3c; margin-bottom:10px;"></div>
+                        <button class="btn" style="background:#388e3c;" onclick="verifyStudentInternalNetPwd()">进入</button>
+                        <button class="btn" style="background:#aaa; margin-left:10px;" onclick="closeStudentInternalNetPwdModal()">取消</button>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+            }
+            document.getElementById('studentInternalNetNum').value = '';
+            document.getElementById('studentInternalNetPwdInput').value = '';
+            document.getElementById('studentInternalNetPwdMsg').innerText = '';
+            modal.style.display = 'flex';
+        }
+        function closeStudentInternalNetPwdModal() {
+            const modal = document.getElementById('studentInternalNetPwdModal');
+            if (modal) modal.style.display = 'none';
+        }
+        function verifyStudentInternalNetPwd() {
+            const num = parseInt(document.getElementById('studentInternalNetNum').value);
+            const pwd = document.getElementById('studentInternalNetPwdInput').value;
+            const msg = document.getElementById('studentInternalNetPwdMsg');
+            if (!num || isNaN(num) || num < 1 || num > 56
+        ) {
+                msg.innerText = '请输入有效学号 (1-56)';
+                return;
+            }
+            if ([57,58,59].includes(num)) {
+                msg.innerText = '57、58、59老师账号禁止访问';
+                return;
+            }
+            // 密码可自定义
+            if (pwd === 'st0062') {
+                closeStudentInternalNetPwdModal();
+                openStudentInternalNet(num);
+            } else {
+                msg.innerText = '密码错误，请重试！';
+            }
+        }
+        function openStudentInternalNet(stuNum) {
+            document.getElementById('loginPage').style.display = 'none';
+            let stuInternalPage = document.getElementById('studentInternalNetPage');
+            if (!stuInternalPage) {
+                stuInternalPage = document.createElement('div');
+                stuInternalPage.id = 'studentInternalNetPage';
+                stuInternalPage.innerHTML = `
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
+                        <h1 style="color:#388e3c; letter-spacing:2px; font-size:2.1rem; display:flex; align-items:center; gap:10px;">
+                            <span style=\"display:inline-block; background:#e8f5e9; border-radius:8px; padding:6px 16px; font-size:1.1rem; color:#388e3c;\">学生内部公开网</span>
+                            <span style=\"font-size:1.1rem; color:#888;\">学号：${stuNum}</span>
+                        </h1>
+                        <button class="btn" style="background:#1976d2;" onclick="closeStudentInternalNet()">返回登录</button>
+                    </div>
+                    <div style="background:#f5f9ff; border-radius:10px; padding:18px 20px; margin-bottom:24px; box-shadow:0 2px 8px #e8f5e9;">
+                        <div style="font-size:15px; color:#388e3c; margin-bottom:8px;">欢迎进入学生内部公开网，部分内容仅供同学们内部参考。</div>
+                        <ul style="color:#333; font-size:16px; line-height:2;">
+                            <li>班级活动照片、视频分享</li>
+                            <li>学习资料、笔记互助</li>
+                            <li>同学风采展示</li>
+                            <li>更多内容请联系管理员补充</li>
+                        </ul>
+                    </div>
+                    <div style="background:#e8f5e9; border-radius:10px; padding:18px 20px; margin-bottom:24px; box-shadow:0 2px 8px #a5d6a7;">
+                        <div style="font-size:16px; color:#388e3c; margin-bottom:8px; font-weight:bold;">班级特色</div>
+                        <button class="btn" style="background:#43a047; font-size:16px; margin-bottom:8px;" onclick="openCPPage()">班级CP组合</button>
+                    </div>
+                `;
+                document.querySelector('.container').appendChild(stuInternalPage);
+            }
+            stuInternalPage.style.display = 'block';
+        }
+        function closeStudentInternalNet() {
+            const stuInternalPage = document.getElementById('studentInternalNetPage');
+            if (stuInternalPage) stuInternalPage.style.display = 'none';
+            document.getElementById('loginPage').style.display = 'block';
+        }
+        function openCPPage() {
+            let cpPage = document.getElementById('cpPage');
+            if (!cpPage) {
+                cpPage = document.createElement('div');
+                cpPage.id = 'cpPage';
+                cpPage.innerHTML = `
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
+                        <h1 style="color:#43a047; letter-spacing:2px; font-size:2.1rem;">班级CP组合</h1>
+                        <button class="btn" style="background:#1976d2;" onclick="closeCPPage()">返回</button>
+                    </div>
+                    <div style="background:#f5f9ff; border-radius:10px; padding:18px 20px; margin-bottom:24px; box-shadow:0 2px 8px #e8f5e9;">
+                        <ul style="color:#333; font-size:17px; line-height:2;">
+                            <li>10号 & 34号 —— 公认CP —— 官方认证</li>
+                        </ul>
+                        <div style="color:#888; font-size:14px; margin-top:18px;">如需补充或修改，请联系管理员。</div>
+                    </div>
+                `;
+                document.querySelector('.container').appendChild(cpPage);
+            }
+            // 隐藏学生内部公开网页面
+            const stuInternalPage = document.getElementById('studentInternalNetPage');
+            if (stuInternalPage) stuInternalPage.style.display = 'none';
+            cpPage.style.display = 'block';
+        }
+        function closeCPPage() {
+            const cpPage = document.getElementById('cpPage');
+            if (cpPage) cpPage.style.display = 'none';
+            const stuInternalPage = document.getElementById('studentInternalNetPage');
+            if (stuInternalPage) stuInternalPage.style.display = 'block';
         }
     </script>
 </body>
