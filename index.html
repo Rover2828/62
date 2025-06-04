@@ -896,8 +896,7 @@ window.addEventListener('DOMContentLoaded', function() {
             const num = parseInt(document.getElementById('studentInternalNetNum').value);
             const pwd = document.getElementById('studentInternalNetPwdInput').value;
             const msg = document.getElementById('studentInternalNetPwdMsg');
-            if (!num || isNaN(num) || num < 1 || num > 56
-        ) {
+            if (!num || isNaN(num) || num < 1 || num > 56) {
                 msg.innerText = '请输入有效学号 (1-56)';
                 return;
             }
@@ -905,12 +904,25 @@ window.addEventListener('DOMContentLoaded', function() {
                 msg.innerText = '57、58、59老师账号禁止访问';
                 return;
             }
-            // 密码可自定义
-            if (pwd === 'st0062') {
+            // 检查学生账号密码
+            if (!userPasswords[num]) {
+                loadUserPasswords().then(function() {
+                    var correctPwd = userPasswords[num];
+                    if (!correctPwd || pwd !== correctPwd) {
+                        msg.innerText = '学号或密码错误';
+                        return;
+                    }
+                    closeStudentInternalNetPwdModal();
+                    openStudentInternalNet(num);
+                });
+            } else {
+                var correctPwd = userPasswords[num];
+                if (!correctPwd || pwd !== correctPwd) {
+                    msg.innerText = '学号或密码错误';
+                    return;
+                }
                 closeStudentInternalNetPwdModal();
                 openStudentInternalNet(num);
-            } else {
-                msg.innerText = '密码错误，请重试！';
             }
         }
         function openStudentInternalNet(stuNum) {
