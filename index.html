@@ -285,7 +285,7 @@ async function loadAdminAccount() {
     }
 }
 
-// 页面加载时预加载密码
+
 window.addEventListener('DOMContentLoaded', function() {
     loadUserPasswords();
     loadAdminAccount();
@@ -295,13 +295,19 @@ window.addEventListener('DOMContentLoaded', function() {
         let isSystemLocked = false;
         let unlockTimeout = null;
 
-        // 移除原有密码配置
-        // const SYSTEM_CONFIG = { ... }
-        // const ADMIN_CONFIG = { ... }
+        function clearStatusMessage() {
+            const messages = document.querySelectorAll('.status-msg');
+            messages.forEach(msg => msg.remove());
+        }
 
-        
+        function showStatusMessage(text, className) {
+            clearStatusMessage();
+            const msg = document.createElement('div');
+            msg.className = 'status-msg ' + className;
+            msg.innerText = text;
+            document.getElementById('loginPage').appendChild(msg);
+        }
 
-        
         async function verifyAccess() {
             if (isSystemLocked) {
                 showStatusMessage("🔒 系统已锁定，请5分钟后再试", "lock-msg");
@@ -310,7 +316,7 @@ window.addEventListener('DOMContentLoaded', function() {
             var stuNum = parseInt(document.getElementById('stuNumber').value);
             var inputPwd = document.getElementById('secretCode').value;
             if (!validateInput(stuNum, inputPwd)) return;
-            // 动态读取密码
+            
             if (!userPasswords[stuNum]) {
                 await loadUserPasswords();
             }
@@ -439,7 +445,7 @@ window.addEventListener('DOMContentLoaded', function() {
             var user = document.getElementById('adminUser').value.trim();
             var pwd = document.getElementById('adminPwd').value;
             var msg = document.getElementById('adminStatusMsg');
-            // 动态读取管理员账号
+            
             if (!adminAccount.user || !adminAccount.pwd) {
                 loadAdminAccount().then(function() {
                     if (user === adminAccount.user && pwd === adminAccount.pwd) {
@@ -634,7 +640,7 @@ window.addEventListener('DOMContentLoaded', function() {
                                     <td style="padding:10px;">18065895215</td>
                                 </tr>
                             </table>
-                            <div style="margin-top:16px; color:#888; font-size:14px; text-align:right;">更新时间：2025年5月27日</div>
+                            <div style="margin-top:16px; color:#888; font-size:14px; text-align:right;">更新时间：2025年6月27日</div>
                         </div>
                     </div>
                 `;
@@ -678,7 +684,7 @@ window.addEventListener('DOMContentLoaded', function() {
         function verifyInternalNetPwd() {
             const pwd = document.getElementById('internalNetPwdInput').value;
             const msg = document.getElementById('internalNetPwdMsg');
-            // 云盘密码可自定义
+            
             if (pwd === '00620602') {
                 closeInternalNetPwdModal();
                 openInternalNet();
@@ -736,7 +742,7 @@ window.addEventListener('DOMContentLoaded', function() {
             if (msg) msg.innerHTML = '';
         }
 
-        // 留言系统入口身份校验与页面跳转
+        
         function enterMsgSystem() {
             var stuNum = parseInt(document.getElementById('msgStuNumber').value);
             var pwd = document.getElementById('msgPwd').value;
