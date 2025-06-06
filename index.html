@@ -138,6 +138,41 @@
             text-align: center;
             color: #333;
         }
+
+        .cp-heart {
+            display: inline-block;
+            width: 22px;
+            height: 20px;
+            position: relative;
+            top: 4px;
+            margin-left: 8px;
+            background: none;
+            animation: cp-heart-beat 1s infinite;
+        }
+        .cp-heart::before,
+        .cp-heart::after {
+            content: '';
+            position: absolute;
+            left: 11px;
+            top: 0;
+            width: 11px;
+            height: 18px;
+            background: #e53935;
+            border-radius: 11px 11px 0 0;
+            transform: rotate(-45deg);
+        }
+        .cp-heart::after {
+            left: 0;
+            transform: rotate(45deg);
+        }
+        @keyframes cp-heart-beat {
+            0%, 100% { transform: scale(1); }
+            10% { transform: scale(1.2); }
+            20% { transform: scale(0.95); }
+            30% { transform: scale(1.1); }
+            50% { transform: scale(0.98); }
+            70% { transform: scale(1.05); }
+        }
     </style>
 </head>
 <body>
@@ -646,13 +681,15 @@ window.addEventListener('DOMContentLoaded', function() {
                 `;
                 document.querySelector('.container').appendChild(internalPage);
             }
+            // 隐藏其它同级页面
+            Array.from(document.querySelectorAll('.container > div')).forEach(div => {
+                if (div.id !== 'internalNetPage') div.style.display = 'none';
+            });
             internalPage.style.display = 'block';
         }
         function closeInternalNet() {
             const internalPage = document.getElementById('internalNetPage');
-            if (internalPage) {
-                internalPage.style.display = 'none';
-            }
+            if (internalPage) internalPage.style.display = 'none';
             document.getElementById('loginPage').style.display = 'block';
         }
 
@@ -910,25 +947,20 @@ window.addEventListener('DOMContentLoaded', function() {
                 msg.innerText = '57、58、59老师账号禁止访问';
                 return;
             }
-            // 检查学生账号密码
-            if (!userPasswords[num]) {
-                loadUserPasswords().then(function() {
-                    var correctPwd = userPasswords[num];
-                    if (!correctPwd || pwd !== correctPwd) {
-                        msg.innerText = '学号或密码错误';
-                        return;
-                    }
-                    closeStudentInternalNetPwdModal();
-                    openStudentInternalNet(num);
-                });
-            } else {
-                var correctPwd = userPasswords[num];
+            function checkPwd(correctPwd) {
                 if (!correctPwd || pwd !== correctPwd) {
                     msg.innerText = '学号或密码错误';
                     return;
                 }
                 closeStudentInternalNetPwdModal();
                 openStudentInternalNet(num);
+            }
+            if (!userPasswords[num]) {
+                loadUserPasswords().then(function() {
+                    checkPwd(userPasswords[num]);
+                });
+            } else {
+                checkPwd(userPasswords[num]);
             }
         }
         function openStudentInternalNet(stuNum) {
@@ -961,6 +993,10 @@ window.addEventListener('DOMContentLoaded', function() {
                 `;
                 document.querySelector('.container').appendChild(stuInternalPage);
             }
+            // 隐藏其它同级页面
+            Array.from(document.querySelectorAll('.container > div')).forEach(div => {
+                if (div.id !== 'studentInternalNetPage') div.style.display = 'none';
+            });
             stuInternalPage.style.display = 'block';
         }
         function closeStudentInternalNet() {
@@ -980,7 +1016,7 @@ window.addEventListener('DOMContentLoaded', function() {
                     </div>
                     <div style="background:#f5f9ff; border-radius:10px; padding:18px 20px; margin-bottom:24px; box-shadow:0 2px 8px #e8f5e9;">
                         <ul style="color:#333; font-size:17px; line-height:2;">
-                            <li>10号 & 34号 —— 公认CP —— |{+}|（官方认证）</li>
+                            <li>10号 & 34号 —— 公认CP —— |{+}|（官方认证）<span class="cp-heart"></span></li>
                         </ul>
                         <div style="color:#888; font-size:14px; margin-top:18px;">如需补充或修改，请联系管理员。</div>
                     </div>
