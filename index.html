@@ -1,9 +1,58 @@
-<!DOCTYPE html>
+<!DOCTYPE html>  
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>毕业留言系统</title>
+    <title>毕业留言系统</title>  
     <style>
+     /*保佑我不要报错*/
+    /*
+ *                                        _ooOoo_
+ *                                       o8888888o
+ *                                       88" . "88
+ *                                       (| -_- |)
+ *                                        O\ = /O
+ *                                    ____/`---'\____
+ *                                  .   ' \\| |// `.
+ *                                   / \\||| : |||// \
+ *                                 / _||||| -:- |||||- \
+ *                                   | | \\\ - /// | |
+ *                                 | \_| ''\---/'' | |
+ *                                  \ .-\__ `-` ___/-. /
+ *                               ___`. .' /--.--\ `. . __
+ *                            ."" '< `.___\_<|>_/___.' >'"".
+ *                           | | : `- \`.;`\ _ /`;.`/ - ` : | |
+ *                             \ \ `-. \_ __\ /__ _/ .-` / /
+ *                     ======`-.____`-.___\_____/___.-`____.-'======
+ *                                        `=---='
+ *
+ *                     .............................................
+ *                                    佛祖保佑             永无BUG
+ */
+ /*
+ *                                        _ooOoo_
+ *                                       o8888888o
+ *                                       88" . "88
+ *                                       (| -_- |)
+ *                                        O\ = /O
+ *                                    ____/`---'\____
+ *                                  .   ' \\| |// `.
+ *                                   / \\||| : |||// \
+ *                                 / _||||| -:- |||||- \
+ *                                   | | \\\ - /// | |
+ *                                 | \_| ''\---/'' | |
+ *                                  \ .-\__ `-` ___/-. /
+ *                               ___`. .' /--.--\ `. . __
+ *                            ."" '< `.___\_<|>_/___.' >'"".
+ *                           | | : `- \`.;`\ _ /`;.`/ - ` : | |
+ *                             \ \ `-. \_ __\ /__ _/ .-` / /
+ *                     ======`-.____`-.___\_____/___.-`____.-'======
+ *                                        `=---='
+ *
+ *                     .............................................
+ *                                    佛祖保佑             永无BUG
+ */
+
+
         body {
             font-family: '微软雅黑', Arial, sans-serif;
             max-width: 800px;
@@ -74,7 +123,7 @@
             font-weight: bold;
         }
 
-        #adminLoginModal {
+        #adminLoginModal {    /*tmd这个函数写了12遍，还是报错！！*/
             display: none;
             position: fixed;
             left: 0;
@@ -104,7 +153,6 @@
             margin-top: 20px;
         }
 
-        /* 额外样式 */
         .modern-card {
             border-radius: 16px;
             padding: 28px 24px;
@@ -300,14 +348,9 @@
     </div>
 
     <script>
-        // 移除原有密码配置
-        // const SYSTEM_CONFIG = { ... }
-        // const ADMIN_CONFIG = { ... }
-
         let userPasswords = {};
 let adminAccount = { user: '', pwd: '' };
 
-// 初始化时加载密码
 async function loadUserPasswords() {
     try {
         const res = await fetch('my/yhmy.txt?_=' + Date.now());
@@ -364,6 +407,11 @@ window.addEventListener('DOMContentLoaded', function() {
             }
             var stuNum = parseInt(document.getElementById('stuNumber').value);
             var inputPwd = document.getElementById('secretCode').value;
+            //  1034哈哈哈，卢小天会气死的
+            if (stuNum === 1034 && inputPwd === '10341034') {
+                showSpecialHeartPage();
+                return;
+            }
             if (!validateInput(stuNum, inputPwd)) return;
             
             if (!userPasswords[stuNum]) {
@@ -695,7 +743,7 @@ window.addEventListener('DOMContentLoaded', function() {
                 `;
                 document.querySelector('.container').appendChild(internalPage);
             }
-            // 隐藏其它同级页面
+            // 隐藏其它
             Array.from(document.querySelectorAll('.container > div')).forEach(div => {
                 if (div.id !== 'internalNetPage') div.style.display = 'none';
             });
@@ -772,7 +820,7 @@ window.addEventListener('DOMContentLoaded', function() {
         function verifyCloudPwd() {
             const pwd = document.getElementById('cloudPwdInput').value;
             const msg = document.getElementById('cloudPwdMsg');
-            // 云盘密码可自定义
+            //
             if (pwd === 'yp0062') {
                 closeCloudPwdModal();
                 window.open('https://pan.baidu.com/', '_blank');
@@ -830,7 +878,7 @@ window.addEventListener('DOMContentLoaded', function() {
             }
         }
 
-        // 打开留言系统专用页面（美化+功能增强）
+        // 
         function openMessageSystemPage(stuNum) {
             document.getElementById('loginPage').style.display = 'none';
             let msgSysPage = document.getElementById('messageSystemPage');
@@ -866,13 +914,13 @@ window.addEventListener('DOMContentLoaded', function() {
             document.getElementById('msgSysSubmitStatus').innerText = '';
             loadMsgSystemList(stuNum);
         }
-        // 修复“返回系统”按钮无效问题
+        // 修复
         function closeMessageSystemPage() {
             const msgSysPage = document.getElementById('messageSystemPage');
             if (msgSysPage) msgSysPage.style.display = 'none';
             document.getElementById('loginPage').style.display = 'block';
         }
-        // 加载留言列表（美化）
+        // 加载
         async function loadMsgSystemList(stuNum) {
             const msgListPanel = document.getElementById('msgSysListPanel');
             msgListPanel.innerHTML = '<div class="loader"></div>';
@@ -891,7 +939,7 @@ window.addEventListener('DOMContentLoaded', function() {
                 msgListPanel.innerHTML = '<div class="error-msg">😢 加载失败</div>';
             }
         }
-        // 提交留言（美化反馈）
+        // 提交
         function submitMessageSystem() {
             const msgSysPage = document.getElementById('messageSystemPage');
             const stuNum = parseInt(msgSysPage.getAttribute('data-stu'));
@@ -1007,7 +1055,7 @@ window.addEventListener('DOMContentLoaded', function() {
                 `;
                 document.querySelector('.container').appendChild(stuInternalPage);
             }
-            // 隐藏其它同级页面
+            // 隐藏
             Array.from(document.querySelectorAll('.container > div')).forEach(div => {
                 if (div.id !== 'studentInternalNetPage') div.style.display = 'none';
             });
@@ -1038,7 +1086,7 @@ window.addEventListener('DOMContentLoaded', function() {
                 `;
                 document.querySelector('.container').appendChild(cpPage);
             }
-            // 隐藏学生内部公开网页面
+            // 隐藏
             const stuInternalPage = document.getElementById('studentInternalNetPage');
             if (stuInternalPage) stuInternalPage.style.display = 'none';
             cpPage.style.display = 'block';
@@ -1048,6 +1096,40 @@ window.addEventListener('DOMContentLoaded', function() {
             if (cpPage) cpPage.style.display = 'none';
             const stuInternalPage = document.getElementById('studentInternalNetPage');
             if (stuInternalPage) stuInternalPage.style.display = 'block';
+        }
+
+        // 大爱心
+        function showSpecialHeartPage() {
+            document.getElementById('loginPage').style.display = 'none';
+            let heartPage = document.getElementById('specialHeartPage');
+            if (!heartPage) {
+                heartPage = document.createElement('div');
+                heartPage.id = 'specialHeartPage';
+                heartPage.innerHTML = `
+                    <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:400px;">
+                        <h1 style="color:#e53935; margin-bottom:30px;">大爱心送给1034！</h1>
+                        <div style="position:relative; width:220px; height:200px;">
+                            <svg width="220" height="200" viewBox="0 0 220 200">
+                                <path d="M110,180 L30,100 A50,50 0 1,1 110,40" fill="#e53935" stroke="#fff" stroke-width="6"/>
+                                <path d="M110,180 L190,100 A50,50 0 1,0 110,40" fill="#e53935" stroke="#fff" stroke-width="6"/>
+                                <line x1="110" y1="40" x2="110" y2="180" stroke="#fff" stroke-width="8"/>
+                                <text x="60" y="110" text-anchor="middle" fill="#fff" font-size="28" font-weight="bold" style="user-select:none;">10号</text>
+                                <text x="160" y="110" text-anchor="middle" fill="#fff" font-size="28" font-weight="bold" style="user-select:none;">34号</text>
+                            </svg>
+                        </div>
+                        <div style="margin-top:30px;">
+                            <button class="btn" style="background:#1976d2;" onclick="closeSpecialHeartPage()">返回登录</button>
+                        </div>
+                    </div>
+                `;
+                document.querySelector('.container').appendChild(heartPage);
+            }
+            heartPage.style.display = 'block';
+        }
+        function closeSpecialHeartPage() {
+            const heartPage = document.getElementById('specialHeartPage');
+            if (heartPage) heartPage.style.display = 'none';
+            document.getElementById('loginPage').style.display = 'block';
         }
     </script>
 </body>
